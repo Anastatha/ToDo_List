@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
 import './App.css';
+import { db } from './firebase';
+import { ref, set, get, update, remove, push } from 'firebase/database';
 
 type ToDo = {
-	id: number;
 	title: string;
 	completed: boolean;
 };
 
+type ToDoWithId = ToDo & { id: string };
+
 export const App: React.FC = () => {
-	const [todo, setTodo] = useState<Array<ToDo>>([]);
+	const [todo, setTodo] = useState<Array<ToDoWithId>>([]);
 	const [isLoading, setLoading] = useState<boolean>(false);
 	const [searchQuery, setSearchQuery] = useState<string>('');
 	const [sortAlphabetically, setSortAlphabetically] = useState<boolean>(false);
@@ -24,10 +27,17 @@ export const App: React.FC = () => {
 
 	useEffect(() => {
 		setLoading(true);
-		fetch('http://localhost:3005/todo')
-			.then((response) => response.json())
-			.then((data) => {
-				setTodo(data);
+		const todoRef = ref(db, 'todos');
+		get(todoRef)
+			.then((snapshot) => {
+				if (snapshot.exists()) {
+					const data = snapshot.val();
+					const todosArray: ToDoWithId[] = Object.keys(data).map((key) => ({
+						id: key,
+						...data[key],
+					}));
+					setTodo(todosArray);
+				}
 			})
 			.finally(() => setLoading(false));
 	}, []);
@@ -35,45 +45,46 @@ export const App: React.FC = () => {
 	const handleAddTodo = () => {
 		if (!newTitle.trim()) return;
 
-		fetch('http://localhost:3005/todo', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json;charset=utf-8' },
-			body: JSON.stringify({
-				title: newTitle,
-				completed: false,
-			}),
-		})
-			.then((response) => response.json())
-			.then((newToDo) => {
-				setTodo((prevTodo) => [...prevTodo, newToDo]);
-				setNewTitle('');
-			});
+		const newTodo: ToDo = {
+			title: newTitle,
+			completed: false,
+		};
+
+		const newTodoRef = ref(db, 'todos');
+		const newTodoKey = push(newTodoRef).key; // уникальный ключ
+
+		if (newTodoKey) {
+			set(ref(db, `todos/${newTodoKey}`), newTodo)
+				.then(() => {
+					setTodo((prevTodo) => [...prevTodo, { id: newTodoKey, ...newTodo }]);
+					setNewTitle('');
+				})
+				.catch((error) => console.error('Error adding todo: ', error));
+		}
 	};
 
-	const handleUpdateTodo = (id: number, completed: boolean) => {
-		fetch(`http://localhost:3005/todo/${id}`, {
-			method: 'PATCH',
-			headers: { 'Content-Type': 'application/json;charset=utf-8' },
-			body: JSON.stringify({
-				completed: !completed,
-			}),
-		})
-			.then((response) => response.json())
-			.then((updatedTodo) => {
+	const handleUpdateTodo = (id: string, completed: boolean) => {
+		const updates: { [key: string]: boolean } = {};
+		updates[`todos/${id}/completed`] = !completed;
+
+		update(ref(db), updates)
+			.then(() => {
 				setTodo((prevTodo) =>
 					prevTodo.map((todo) =>
-						todo.id === updatedTodo.id ? updatedTodo : todo,
+						todo.id === id ? { ...todo, completed: !completed } : todo,
 					),
 				);
-			});
+			})
+			.catch((error) => console.error('Error updating todo: ', error));
 	};
 
-	const handleDeleteTodo = (id: number) => {
-		fetch(`http://localhost:3005/todo/${id}`, {
-			method: 'DELETE',
-		}).then(() => {
-			setTodo((prevTodo) => prevTodo.filter((todo) => todo.id !== id));
-		});
+	const handleDeleteTodo = (id: string) => {
+		const todoRef = ref(db, `todos/${id}`);
+		remove(todoRef)
+			.then(() => {
+				setTodo((prevTodo) => prevTodo.filter((todo) => todo.id !== id));
+			})
+			.catch((error) => console.error('Error deleting todo: ', error));
 	};
 
 	const handleSearch = debounce((query: string) => {
