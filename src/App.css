@@ -26,40 +26,6 @@ h1 {
 	color: #007bff;
 }
 
-.todo-list {
-	margin-top: 20px;
-}
-
-.todo-item {
-	display: flex;
-	align-items: center;
-	padding: 10px;
-	margin: 8px 0;
-	background-color: #f9f9f9;
-	border-radius: 5px;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-	transition: background-color 0.3s ease;
-}
-
-.todo-item:hover {
-	background-color: #f1f1f1;
-}
-
-.completed .todo-title {
-	text-decoration: line-through;
-	color: #888;
-}
-
-input[type="checkbox"] {
-	margin-right: 10px;
-}
-
-.todo-title {
-	flex-grow: 1;
-	text-align: left;
-	font-size: 1rem;
-}
-
 button {
 	margin: 5px;
 	padding: 8px 12px;
@@ -78,16 +44,6 @@ button:hover {
 button:disabled {
 	background-color: #d3d3d3;
 	cursor: not-allowed;
-}
-
-.search-input {
-	margin-top: 10px;
-	margin-bottom: 20px;
-	padding: 8px;
-	width: 100%;
-	border: 1px solid #ddd;
-	border-radius: 5px;
-	box-sizing: border-box;
 }
 
 input[type="text"] {
