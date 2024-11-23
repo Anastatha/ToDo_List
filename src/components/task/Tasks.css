@@ -1,0 +1,64 @@
+.todo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.todo-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.todo-item.completed {
+    background-color: #f0f8ff;
+    text-decoration: line-through;
+}
+
+.todo-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.todo-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.details-link {
+    text-decoration: none;
+    color: blue;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.delete-button {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.delete-button:hover {
+    background-color: darkred;
+}
+
+.todo-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px; 
+  cursor: pointer;
+  text-decoration: none; 
+  color: inherit;
+}
+
+.todo-title:hover {
+  text-decoration: underline;
+}

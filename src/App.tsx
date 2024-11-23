@@ -1,12 +1,13 @@
-import { useEffect, useState } from 'react';
 import './App.css';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { HomePage } from './pages/home/Home';
+import { useEffect, useState } from 'react';
+import { addTodo, deleteTodo, fetchTodos, updateTodo } from './api/todoService';
 import { ToDo } from './type/types';
-import { addTodo, deleteTodo, fetchTodos, updateTodo } from './services/todoService';
-import AddTodoForm from './components/form/AddTodoForm';
-import SearchInput from './components/searchInput/SearchInput';
-import TodoList from './components/list/List';
+import { TaskPage } from './pages/task/Task';
+import { ErrorPage } from './pages/error/Error';
 
-export const App: React.FC = () => {
+const App: React.FC = () => {
 	const [todo, setTodo] = useState<ToDo[]>([]);
 	const [isLoading, setLoading] = useState<boolean>(false);
 	const [searchQuery, setSearchQuery] = useState<string>('');
@@ -48,21 +49,33 @@ export const App: React.FC = () => {
 
 	return (
 		<div className='app'>
-			<h1>To-Do List</h1>
-			<SearchInput onSearch={handleSearch} />
-			<button onClick={toggleSort}>
-				{sortAlphabetically ? 'Disable Sort' : 'Sort Alphabetically'}
-			</button>
-			<AddTodoForm onAdd={handleAddTodo} />
-			{isLoading ? (
-				<div className='loader'>Loading...</div>
-			) : (
-				<TodoList
-					todos={filteredAndSortedTodos}
-					onUpdate={handleUpdateTodo}
-					onDelete={handleDeleteTodo}
+			<Routes>
+				<Route
+					path='/'
+					element={
+						<HomePage
+							todos={filteredAndSortedTodos}
+							isLoading={isLoading}
+							onAdd={handleAddTodo}
+							onSearch={handleSearch}
+							toggleSort={toggleSort}
+							sortAlphabetically={sortAlphabetically}
+						/>
+					}
 				/>
-			)}
+				<Route
+					path='/task/:id'
+					element={
+						<TaskPage
+							todos={todo}
+							onDelete={handleDeleteTodo}
+							onUpdate={handleUpdateTodo}
+						/>
+					}
+				/>
+				<Route path='/404' element={<ErrorPage />} />
+				<Route path='*' element={<Navigate to='/404' />} />
+			</Routes>
 		</div>
 	);
 };
