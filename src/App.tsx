@@ -2,48 +2,43 @@ import './App.css';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { HomePage } from './pages/home/Home';
 import { useEffect, useState } from 'react';
-import { addTodo, deleteTodo, fetchTodos, updateTodo } from './api/todoService';
-import { ToDo } from './type/types';
 import { TaskPage } from './pages/task/Task';
 import { ErrorPage } from './pages/error/Error';
+import { useAppDispatch, useAppSelector } from './services';
+import {
+	getList,
+	addTodoAsync,
+	updateTodoAsync,
+	deleteTodoAsync,
+} from './services/task/actions';
 
 const App: React.FC = () => {
-	const [todo, setTodo] = useState<ToDo[]>([]);
-	const [isLoading, setLoading] = useState<boolean>(false);
+	const dispatch = useAppDispatch();
+	const todos = useAppSelector((state) => state.tasks.list);
+	const isLoading = useAppSelector((state) => state.tasks.loading);
 	const [searchQuery, setSearchQuery] = useState<string>('');
 	const [sortAlphabetically, setSortAlphabetically] = useState<boolean>(false);
 
 	useEffect(() => {
-		setLoading(true);
-		fetchTodos()
-			.then((data) => setTodo(data))
-			.finally(() => setLoading(false));
-	}, []);
+		dispatch(getList());
+	}, [dispatch]);
 
 	const handleAddTodo = (title: string) => {
-		addTodo(title).then((newToDo) => {
-			setTodo((prevTodo) => [...prevTodo, newToDo]);
-		});
+		dispatch(addTodoAsync(title));
 	};
 
 	const handleUpdateTodo = (id: number, completed: boolean) => {
-		updateTodo(id, completed).then((updatedTodo) => {
-			setTodo((prevTodo) =>
-				prevTodo.map((todo) => (todo.id === updatedTodo.id ? updatedTodo : todo)),
-			);
-		});
+		dispatch(updateTodoAsync({ id, completed }));
 	};
 
 	const handleDeleteTodo = (id: number) => {
-		deleteTodo(id).then(() => {
-			setTodo((prevTodo) => prevTodo.filter((todo) => todo.id !== id));
-		});
+		dispatch(deleteTodoAsync(id));
 	};
 
 	const handleSearch = (query: string) => setSearchQuery(query.toLowerCase());
 	const toggleSort = () => setSortAlphabetically(!sortAlphabetically);
 
-	const filteredAndSortedTodos = todo
+	const filteredAndSortedTodos = todos
 		.filter((t) => t.title.toLowerCase().includes(searchQuery))
 		.sort((a, b) => (sortAlphabetically ? a.title.localeCompare(b.title) : 0));
 
@@ -67,7 +62,7 @@ const App: React.FC = () => {
 					path='/task/:id'
 					element={
 						<TaskPage
-							todos={todo}
+							todos={todos}
 							onDelete={handleDeleteTodo}
 							onUpdate={handleUpdateTodo}
 						/>
