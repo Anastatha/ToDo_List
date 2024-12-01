@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
+import { useTodoContext } from '../../Context';
 
-type Props = {
-	onAdd: (title: string) => void;
-};
-
-const AddTodoForm: React.FC<Props> = ({ onAdd }) => {
+const AddTodoForm: React.FC = () => {
 	const [title, setTitle] = useState<string>('');
+	const { handleAddTodo } = useTodoContext();
 
 	const handleAdd = () => {
 		if (title.trim()) {
-			onAdd(title);
+			handleAddTodo(title);
 			setTitle('');
 		}
 	};
