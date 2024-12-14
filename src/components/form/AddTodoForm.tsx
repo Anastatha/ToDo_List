@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { useTodoContext } from '../../Context';
+import { useDispatch } from 'react-redux';
+import { addTodoAction } from '../../services/actions/todoActions';
 
 const AddTodoForm: React.FC = () => {
 	const [title, setTitle] = useState<string>('');
-	const { handleAddTodo } = useTodoContext();
+	const dispatch = useDispatch();
 
 	const handleAdd = () => {
 		if (title.trim()) {
-			handleAddTodo(title);
+			dispatch(addTodoAction(title) as any);
 			setTitle('');
 		}
 	};

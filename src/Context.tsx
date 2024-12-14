@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { addTodo, deleteTodo, fetchTodos, updateTodo } from './services/todoService';
+import { addTodo, deleteTodo, fetchTodos, updateTodo } from './api/todoService';
 import { ToDo } from './type/types';
 
 type TodoContextType = {

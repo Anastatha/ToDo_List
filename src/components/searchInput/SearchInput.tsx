@@ -9,15 +9,7 @@ const SearchInput: React.FC<Props> = ({ onSearch }) => {
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setQuery(e.target.value);
-		debounce(() => onSearch(e.target.value), 300)();
-	};
-
-	const debounce = (func: Function, delay: number) => {
-		let timer: NodeJS.Timeout;
-		return (...args: any) => {
-			clearTimeout(timer);
-			timer = setTimeout(() => func(...args), delay);
-		};
+		onSearch(e.target.value);
 	};
 
 	return (
