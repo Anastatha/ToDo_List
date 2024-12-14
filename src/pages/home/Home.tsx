@@ -1,38 +1,42 @@
-import React from 'react';
-import AddTodoForm from '../../components/form/AddTodoForm';
+import { useEffect, useMemo, useState } from 'react';
 import SearchInput from '../../components/searchInput/SearchInput';
 import { TasksList } from '../../components/task/Tasks';
-import { ToDo } from '../../type/types';
+import { useAppDispatch, useAppSelector } from '../../services';
+import { getList } from '../../services/task/actions';
+import { AddTask } from '../../components/add-task';
 
-interface HomePageProps {
-	todos: ToDo[];
-	isLoading: boolean;
-	onAdd: (title: string) => void;
-	onSearch: (query: string) => void;
-	toggleSort: () => void;
-	sortAlphabetically: boolean;
-}
+export const HomePage = ({}) => {
+	const dispatch = useAppDispatch();
+	const todos = useAppSelector((state) => state.tasks.list);
+	const isLoading = useAppSelector((state) => state.tasks.loading);
+	const [searchQuery, setSearchQuery] = useState<string>('');
+	const [sortAlphabetically, setSortAlphabetically] = useState<boolean>(false);
 
-export const HomePage: React.FC<HomePageProps> = ({
-	todos,
-	isLoading,
-	onAdd,
-	onSearch,
-	toggleSort,
-	sortAlphabetically,
-}) => {
+	useEffect(() => {
+		dispatch(getList());
+	}, [dispatch]);
+
+	const handleSearch = (query: string) => setSearchQuery(query.toLowerCase());
+	const toggleSort = () => setSortAlphabetically(!sortAlphabetically);
+
+	const filteredAndSortedTodos = useMemo(() => {
+		return todos
+			.filter((t) => t.title.toLowerCase().includes(searchQuery))
+			.sort((a, b) => (sortAlphabetically ? a.title.localeCompare(b.title) : 0));
+	}, [todos, searchQuery, sortAlphabetically]);
+
 	return (
 		<div>
 			<h1>To-Do List</h1>
-			<SearchInput onSearch={onSearch} />
+			<SearchInput onSearch={handleSearch} />
 			<button onClick={toggleSort}>
 				{sortAlphabetically ? 'Disable Sort' : 'Sort Alphabetically'}
 			</button>
-			<AddTodoForm onAdd={onAdd} />
+			<AddTask />
 			{isLoading ? (
 				<div className='loader'>Loading...</div>
 			) : (
-				<TasksList todos={todos} />
+				<TasksList todos={filteredAndSortedTodos} />
 			)}
 		</div>
 	);

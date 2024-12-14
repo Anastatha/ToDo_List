@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import debounce from '../../utils/debounce';
 
 type Props = {
 	onSearch: (query: string) => void;
@@ -7,17 +8,11 @@ type Props = {
 const SearchInput: React.FC<Props> = ({ onSearch }) => {
 	const [query, setQuery] = useState<string>('');
 
+	const onSeachDebounce = debounce(onSearch, 300);
+
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setQuery(e.target.value);
-		debounce(() => onSearch(e.target.value), 300)();
-	};
-
-	const debounce = (func: Function, delay: number) => {
-		let timer: NodeJS.Timeout;
-		return (...args: any) => {
-			clearTimeout(timer);
-			timer = setTimeout(() => func(...args), delay);
-		};
+		onSeachDebounce(e.target.value);
 	};
 
 	return (

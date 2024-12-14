@@ -2,15 +2,16 @@ import React, { useState } from 'react';
 
 type Props = {
 	onAdd: (title: string) => void;
+	placeholder: string;
 };
 
-const AddTodoForm: React.FC<Props> = ({ onAdd }) => {
-	const [title, setTitle] = useState<string>('');
+const AddTodoForm: React.FC<Props> = ({ onAdd, placeholder }) => {
+	const [value, setValue] = useState<string>('');
 
 	const handleAdd = () => {
-		if (title.trim()) {
-			onAdd(title);
-			setTitle('');
+		if (value.trim()) {
+			onAdd(value);
+			setValue('');
 		}
 	};
 
@@ -18,9 +19,9 @@ const AddTodoForm: React.FC<Props> = ({ onAdd }) => {
 		<div>
 			<input
 				type='text'
-				value={title}
-				onChange={(e) => setTitle(e.target.value)}
-				placeholder='Enter task title'
+				value={value}
+				onChange={(e) => setValue(e.target.value)}
+				placeholder={placeholder}
 			/>
 			<button onClick={handleAdd}>Add Task</button>
 		</div>

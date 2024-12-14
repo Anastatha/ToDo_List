@@ -1,25 +1,34 @@
-import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ToDo } from '../../type/types';
+import { deleteTodoAsync, getList, updateTodoAsync } from '../../services/task/actions';
+import { useAppDispatch, useAppSelector } from '../../services';
+import { getIngredientsById } from '../../services/task/slice';
+import { useEffect } from 'react';
+import BackButton from '../../components/back-button';
 
-interface TaskPageProps {
-	todos: ToDo[];
-	onDelete: (id: number) => void;
-	onUpdate: (id: number, completed: boolean) => void;
-}
-
-export const TaskPage: React.FC<TaskPageProps> = ({ todos, onDelete, onUpdate }) => {
+export const TaskPage = () => {
+	const dispatch = useAppDispatch();
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
-	const task = todos.find((todo) => todo.id === Number(id));
+	const task = useAppSelector((state) => {
+		if (!id) return undefined;
+		return getIngredientsById({ ...state, id: Number(id) });
+	});
+
+	useEffect(() => {
+		dispatch(getList());
+	}, [dispatch]);
 
 	if (!task) {
 		return <div>Task not found</div>;
 	}
 
 	const handleDelete = () => {
-		onDelete(task.id);
+		dispatch(deleteTodoAsync(task.id));
 		navigate('/');
+	};
+
+	const handleUpdateTodo = (id: number, completed: boolean) => {
+		dispatch(updateTodoAsync({ id, completed }));
 	};
 
 	return (
@@ -28,12 +37,12 @@ export const TaskPage: React.FC<TaskPageProps> = ({ todos, onDelete, onUpdate })
 				<input
 					type='checkbox'
 					checked={task.completed}
-					onChange={() => onUpdate(task.id, task.completed)}
+					onChange={() => handleUpdateTodo(task.id, task.completed)}
 				/>
 				<span>{task.title}</span>
 			</div>
 			<button onClick={handleDelete}>Delete Task</button>
-			<button onClick={() => navigate(-1)}>← Back</button>
+			<BackButton />
 		</div>
 	);
 };
